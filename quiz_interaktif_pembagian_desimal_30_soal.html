@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interaktif Pembagian Desimal - Kelas 4 SD</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#3B82F6',
+                            purple: '#8B5CF6',
+                            pink: '#EC4899',
+                            yellow: '#F59E0B',
+                            green: '#10B981',
+                            dark: '#1E293B'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        jakarta: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+        .font-kids {
+            font-family: 'Fredoka', cursive;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.05);
+        }
+        .pulse-glow {
+            animation: pulse-glow-anim 2s infinite;
+        }
+        @keyframes pulse-glow-anim {
+            0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(139, 92, 246, 0.7); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0f2fe;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12">
+
+    <!-- HEADER & SCOREBAR -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-4 border-brand-blue shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-tr from-brand-blue to-brand-purple rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl shadow-md">
+                    <i class="fa-solid fa-square-root-variable"></i>
+                </div>
+                <div>
+                    <h1 class="font-kids text-lg md:text-2xl font-bold bg-gradient-to-r from-brand-blue via-brand-purple to-brand-pink bg-clip-text text-transparent">
+                        Quiz Pembagian Desimal
+                    </h1>
+                    <p class="text-xs text-slate-500 font-semibold hidden sm:block">Penguatan Matematika - 30 Soal Interaktif Kelas 4 SD</p>
+                </div>
+            </div>
+
+            <!-- Global Counters -->
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <!-- Stars -->
+                <div class="bg-amber-100 border-2 border-amber-300 px-3 py-1 rounded-2xl flex items-center space-x-1.5">
+                    <i class="fa-solid fa-star text-amber-500 text-base animate-bounce"></i>
+                    <span id="stat-stars" class="font-kids font-bold text-amber-800 text-base">0</span>
+                    <span class="text-xs text-amber-600 font-bold hidden md:inline">Bintang</span>
+                </div>
+
+                <!-- Progress Counter -->
+                <div class="bg-blue-50 border-2 border-blue-200 px-3 py-1 rounded-2xl flex items-center space-x-1.5">
+                    <i class="fa-solid fa-list-check text-brand-blue text-sm"></i>
+                    <span id="stat-progress" class="font-kids font-bold text-brand-blue text-base">0/30</span>
+                </div>
+
+                <!-- Sound Button -->
+                <button id="sound-btn" onclick="toggleAudio()" class="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+
+                <!-- Reset Button -->
+                <button onclick="confirmReset()" title="Mulai Ulang Quiz" class="w-9 h-9 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl flex items-center justify-center transition">
+                    <i class="fa-solid fa-rotate-right text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="w-full bg-slate-100 h-2">
+            <div id="progress-bar-fill" class="bg-gradient-to-r from-brand-blue via-brand-purple to-brand-green h-2 transition-all duration-300" style="width: 0%;"></div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT/MAIN COLUMN: QUESTION CARD -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- MAIN QUESTION CARD -->
+                <div class="bg-white rounded-3xl p-6 md:p-8 card-shadow border border-slate-100 relative">
+
+                    <!-- Question Header & Badges -->
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <span id="q-number-badge" class="font-kids text-xs font-bold text-white bg-brand-blue px-3 py-1 rounded-full shadow-sm">
+                                Soal #1
+                            </span>
+                            <span id="q-category-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                                Jenis Soal
+                            </span>
+                        </div>
+                        <span id="q-status-text" class="text-xs font-bold text-slate-400">
+                            Belum Dijawab
+                        </span>
+                    </div>
+
+                    <!-- Question Text & Equation Display -->
+                    <div class="my-6">
+                        <p id="q-text" class="text-base md:text-lg font-semibold text-slate-800 leading-relaxed">
+                            Memuat soal...
+                        </p>
+
+                        <!-- Big Math Box -->
+                        <div id="q-math-box" class="mt-4 p-4 bg-blue-50/80 border-2 border-blue-100 rounded-2xl text-center font-kids text-2xl md:text-3xl text-brand-blue font-bold shadow-inner">
+                            -
+                        </div>
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 my-6">
+                        <!-- Options populated dynamically -->
+                    </div>
+
+                    <!-- Explanation Box (Appears after answering) -->
+                    <div id="explanation-box" class="hidden p-4 rounded-2xl border text-sm space-y-2">
+                        <div class="flex items-center space-x-2 font-bold font-kids text-base" id="explanation-title">
+                            <i id="explanation-icon" class="fa-solid"></i>
+                            <span id="explanation-header-text">Pembahasan</span>
+                        </div>
+                        <p id="explanation-text" class="text-slate-700 leading-normal">
+                            -
+                        </p>
+                    </div>
+
+                    <!-- Navigation Controls Bottom -->
+                    <div class="flex items-center justify-between pt-6 border-t border-slate-100 mt-6">
+                        <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-kids text-sm font-bold rounded-xl transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Sebelumnya</span>
+                        </button>
+
+                        <div class="text-xs text-slate-400 font-bold hidden sm:block">
+                            Soal <span id="current-q-num">1</span> dari 30
+                        </div>
+
+                        <button id="btn-next" onclick="navigateQuestion(1)" class="px-5 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-kids text-sm font-bold rounded-xl shadow-md transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <span>Berikutnya</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- COMPLETION SUMMARY BANNER (Shown when all 30 questions are answered) -->
+                <div id="completion-summary" class="hidden bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-3xl p-6 md:p-8 shadow-xl text-center space-y-4">
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl mx-auto backdrop-blur-md">
+                        🏆
+                    </div>
+                    <h2 class="font-kids text-2xl md:text-3xl font-bold">Luar Biasa! Quiz Telah Selesai!</h2>
+                    <p class="text-emerald-100 text-sm max-w-lg mx-auto">
+                        Kamu telah menyelesaikan semua 30 soal pembagian desimal. Semua jawaban kamu telah tersimpan dengan aman.
+                    </p>
+                    
+                    <div class="grid grid-cols-3 gap-3 max-w-md mx-auto pt-2">
+                        <div class="bg-white/10 backdrop-blur-sm p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xs text-emerald-100">Total Benar</span>
+                            <span id="final-correct" class="font-kids text-2xl font-bold text-yellow-300">0</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xs text-emerald-100">Akurasi</span>
+                            <span id="final-accuracy" class="font-kids text-2xl font-bold text-white">0%</span>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-3 rounded-2xl border border-white/20">
+                            <span class="block text-xs text-emerald-100">Bintang</span>
+                            <span id="final-stars" class="font-kids text-2xl font-bold text-amber-300">0</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex flex-wrap justify-center gap-3">
+                        <button onclick="confirmReset()" class="px-6 py-3 bg-white text-emerald-700 hover:bg-emerald-50 font-kids text-sm font-bold rounded-2xl shadow-lg transition">
+                            <i class="fa-solid fa-rotate-right mr-2"></i>Coba Ulangi Quiz
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: QUESTION PALETTE GRID (NAVIGATION) -->
+            <div class="lg:col-span-4 space-y-6">
+
+                <div class="bg-white rounded-3xl p-6 card-shadow border border-slate-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-kids text-base font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-grip text-brand-purple"></i>
+                            <span>Navigasi Soal (1 - 30)</span>
+                        </h3>
+                        <span id="saved-indicator" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i> Tersimpan
+                        </span>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="grid grid-cols-3 gap-2 text-xs font-semibold mb-4 text-slate-600">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded-full bg-slate-200 inline-block"></span>
+                            <span>Belum</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                            <span>Benar</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                            <span>Salah</span>
+                        </div>
+                    </div>
+
+                    <!-- 30 Number Buttons Grid -->
+                    <div id="palette-grid" class="grid grid-cols-5 gap-2 max-h-[380px] overflow-y-auto p-1">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <!-- Quick Info Footer -->
+                    <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-2">
+                        <p class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-brand-blue"></i>
+                            <span>Progress quiz tersimpan otomatis di browser ini.</span>
+                        </p>
+                        <p class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-wifi text-brand-purple"></i>
+                            <span>Tetap dapat dikerjakan meskipun tanpa koneksi internet.</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        /* 1. QUIZ DATA: 30 ACCURATE & WELL-BALANCED QUESTIONS FOR GRADE 4 SD */
+        const quizQuestions = [
+            {
+                id: 1,
+                category: "Cacah ÷ Desimal",
+                text: "Hasil dari pembagian bilangan bulat dengan desimal di bawah ini adalah:",
+                math: "8 ÷ 0,2 = ?",
+                options: ["4", "40", "400", "0,4"],
+                correctIndex: 1, // B
+                explanation: "Ubah pembagi 0,2 menjadi bilangan bulat dengan mengalikannya 10. Kalikan 8 dengan 10 sehingga menjadi 80. Hitung 80 ÷ 2 = 40."
+            },
+            {
+                id: 2,
+                category: "Desimal ÷ Cacah",
+                text: "Berapakah hasil pembagian desimal berikut?",
+                math: "4,5 ÷ 5 = ?",
+                options: ["45", "0,09", "0,9", "9,0"],
+                correctIndex: 2, // C
+                explanation: "Hitung pembagian biasa tanpa koma: 45 ÷ 5 = 9. Karena 4,5 memiliki 1 angka di belakang koma, kembalikan koma sehingga hasilnya 0,9."
+            },
+            {
+                id: 3,
+                category: "Desimal ÷ Desimal",
+                text: "Hitunglah hasil dari pembagian desimal berikut:",
+                math: "3,6 ÷ 0,6 = ?",
+                options: ["6", "60", "0,6", "0,06"],
+                correctIndex: 0, // A
+                explanation: "Geser koma 1 kali ke kanan pada kedua bilangan (dikali 10). Bentuk sederhananya menjadi 36 ÷ 6 = 6."
+            },
+            {
+                id: 4,
+                category: "Soal Cerita",
+                text: "Ibu mempunyai pita sepanjang 2,4 meter. Pita tersebut dipotong menjadi 4 bagian yang sama panjang. Berapa meter panjang setiap potong pita?",
+                math: "2,4 meter ÷ 4",
+                options: ["0,06 meter", "6 meter", "0,24 meter", "0,6 meter"],
+                correctIndex: 3, // D
+                explanation: "Bentuk matematikanya adalah 2,4 ÷ 4. Hitung 24 ÷ 4 = 6. Kembalikan 1 angka desimal menjadi 0,6 meter."
+            },
+            {
+                id: 5,
+                category: "Cacah ÷ Desimal",
+                text: "Berapakah hasil pembagian bilangan cacah dengan desimal berikut?",
+                math: "12 ÷ 0,3 = ?",
+                options: ["4", "400", "40", "0,4"],
+                correctIndex: 2, // C
+                explanation: "Kalikan kedua bilangan dengan 10 agar koma hilang. Soal menjadi 120 ÷ 3 = 40."
+            },
+            {
+                id: 6,
+                category: "Desimal ÷ Cacah",
+                text: "Hasil dari pembagian di bawah ini adalah:",
+                math: "0,8 ÷ 2 = ?",
+                options: ["0,4", "4", "0,04", "40"],
+                correctIndex: 0, // A
+                explanation: "Hitung 8 ÷ 2 = 4. Tambahkan 1 angka di belakang koma sehingga menjadi 0,4."
+            },
+            {
+                id: 7,
+                category: "Desimal ÷ Desimal",
+                text: "Berapakah hasil dari pembagian desimal dengan desimal berikut?",
+                math: "1,5 ÷ 0,3 = ?",
+                options: ["0,5", "5", "50", "0,05"],
+                correctIndex: 1, // B
+                explanation: "Geser koma 1 kali ke kanan pada kedua bilangan (dikali 10) menjadi 15 ÷ 3 = 5."
+            },
+            {
+                id: 8,
+                category: "Desimal ÷ Desimal 2 Angka",
+                text: "Hitunglah hasil pembagian desimal berikut:",
+                math: "0,48 ÷ 0,06 = ?",
+                options: ["0,8", "80", "0,08", "8"],
+                correctIndex: 3, // D
+                explanation: "Kedua bilangan memiliki 2 angka di belakang koma. Geser koma 2 kali ke kanan (dikali 100) menjadi 48 ÷ 6 = 8."
+            },
+            {
+                id: 9,
+                category: "Cacah ÷ Desimal",
+                text: "Hasil pembagian dari bilangan berikut adalah:",
+                math: "15 ÷ 0,5 = ?",
+                options: ["300", "3", "30", "0,3"],
+                correctIndex: 2, // C
+                explanation: "Kalikan kedua bilangan dengan 10 sehingga menjadi 150 ÷ 5 = 30."
+            },
+            {
+                id: 10,
+                category: "Desimal ÷ Cacah",
+                text: "Berapakah hasil dari pembagian berikut?",
+                math: "6,3 ÷ 7 = ?",
+                options: ["0,9", "9", "0,09", "90"],
+                correctIndex: 0, // A
+                explanation: "Hitung 63 ÷ 7 = 9. Letakkan koma 1 angka di depan angka 9 menjadi 0,9."
+            },
+            {
+                id: 11,
+                category: "Desimal ÷ Desimal",
+                text: "Hasil pembagian desimal berikut adalah:",
+                math: "2,8 ÷ 0,4 = ?",
+                options: ["0,7", "7", "70", "0,07"],
+                correctIndex: 1, // B
+                explanation: "Geser koma 1 kali pada kedua angka (dikali 10) menjadi 28 ÷ 4 = 7."
+            },
+            {
+                id: 12,
+                category: "Soal Cerita",
+                text: "Sebuah botol berisi 1,5 liter sirup. Sirup tersebut akan dituang ke dalam gelas-gelas kecil berkapasitas 0,25 liter. Berapa gelas yang dapat diisi penuh?",
+                math: "1,5 liter ÷ 0,25 liter",
+                options: ["15 gelas", "5 gelas", "60 gelas", "6 gelas"],
+                correctIndex: 3, // D
+                explanation: "Geser koma 2 kali pada kedua angka (dikali 100) sehingga menjadi 150 ÷ 25 = 6 gelas."
+            },
+            {
+                id: 13,
+                category: "Cacah ÷ Desimal",
+                text: "Berapakah hasil pembagian berikut?",
+                math: "20 ÷ 0,4 = ?",
+                options: ["50", "5", "500", "0,5"],
+                correctIndex: 0, // A
+                explanation: "Kalikan kedua angka dengan 10 untuk menghilangkan koma pada 0,4. Soal menjadi 200 ÷ 4 = 50."
+            },
+            {
+                id: 14,
+                category: "Desimal ÷ Cacah",
+                text: "Hasil pembagian dari desimal berikut adalah:",
+                math: "1,8 ÷ 9 = ?",
+                options: ["2", "0,02", "0,2", "20"],
+                correctIndex: 2, // C
+                explanation: "Hitung 18 ÷ 9 = 2. Kembalikan 1 angka desimal menjadi 0,2."
+            },
+            {
+                id: 15,
+                category: "Desimal ÷ Desimal",
+                text: "Berapakah hasil pembagian desimal berikut?",
+                math: "4,2 ÷ 0,7 = ?",
+                options: ["0,6", "6", "60", "0,06"],
+                correctIndex: 1, // B
+                explanation: "Geser koma 1 kali ke kanan pada keduanya (dikali 10) menjadi 42 ÷ 7 = 6."
+            },
+            {
+                id: 16,
+                category: "Desimal ÷ Desimal 2 Angka",
+                text: "Hasil pembagian desimal dengan 2 angka di belakang koma berikut adalah:",
+                math: "0,72 ÷ 0,08 = ?",
+                options: ["0,9", "90", "0,09", "9"],
+                correctIndex: 3, // D
+                explanation: "Geser koma 2 kali ke kanan pada kedua angka (dikali 100) sehingga menjadi 72 ÷ 8 = 9."
+            },
+            {
+                id: 17,
+                category: "Cacah ÷ Desimal 2 Angka",
+                text: "Berapakah hasil pembagian bilangan cacah berikut?",
+                math: "10 ÷ 0,25 = ?",
+                options: ["40", "4", "400", "25"],
+                correctIndex: 0, // A
+                explanation: "Pembagi 0,25 memiliki 2 angka desimal, maka dikali 100. Soal menjadi 1000 ÷ 25 = 40."
+            },
+            {
+                id: 18,
+                category: "Desimal ÷ Cacah",
+                text: "Hasil dari pembagian berikut adalah:",
+                math: "5,6 ÷ 8 = ?",
+                options: ["7", "0,7", "0,07", "70"],
+                correctIndex: 1, // B
+                explanation: "Hitung 56 ÷ 8 = 7. Kembalikan koma 1 angka ke belakang sehingga diperoleh 0,7."
+            },
+            {
+                id: 19,
+                category: "Desimal ÷ Desimal",
+                text: "Hitunglah hasil dari pembagian desimal berikut:",
+                math: "2,4 ÷ 0,3 = ?",
+                options: ["0,8", "80", "8", "0,08"],
+                correctIndex: 2, // C
+                explanation: "Geser koma 1 kali ke kanan pada kedua angka (dikali 10) menjadi 24 ÷ 3 = 8."
+            },
+            {
+                id: 20,
+                category: "Soal Cerita",
+                text: "Pak Budi membeli 3,5 kg beras. Beras tersebut dimasukkan ke dalam 5 kantong plastik sama banyak. Berapa kg beras dalam setiap kantong?",
+                math: "3,5 kg ÷ 5 kantong",
+                options: ["7 kg", "0,07 kg", "3,5 kg", "0,7 kg"],
+                correctIndex: 3, // D
+                explanation: "Hitung 35 ÷ 5 = 7. Karena 3,5 memiliki 1 angka desimal, hasilnya adalah 0,7 kg."
+            },
+            {
+                id: 21,
+                category: "Cacah ÷ Desimal",
+                text: "Berapakah hasil pembagian bilangan bulat ini?",
+                math: "14 ÷ 0,7 = ?",
+                options: ["200", "20", "2", "0,2"],
+                correctIndex: 1, // B
+                explanation: "Kalikan kedua bilangan dengan 10 agar koma hilang. Soal menjadi 140 ÷ 7 = 20."
+            },
+            {
+                id: 22,
+                category: "Desimal ÷ Cacah",
+                text: "Hasil pembagian desimal dengan bilangan cacah berikut adalah:",
+                math: "3,2 ÷ 4 = ?",
+                options: ["8", "0,08", "0,8", "80"],
+                correctIndex: 2, // C
+                explanation: "Hitung 32 ÷ 4 = 8. Kembalikan 1 angka di belakang koma menjadi 0,8."
+            },
+            {
+                id: 23,
+                category: "Desimal ÷ Desimal",
+                text: "Berapakah hasil dari pembagian berikut?",
+                math: "0,9 ÷ 0,3 = ?",
+                options: ["3", "0,3", "30", "0,03"],
+                correctIndex: 0, // A
+                explanation: "Geser koma 1 kali ke kanan pada kedua angka (dikali 10) menjadi 9 ÷ 3 = 3."
+            },
+            {
+                id: 24,
+                category: "Desimal ÷ Desimal Beda Angka",
+                text: "Hitunglah pembagian desimal berikut:",
+                math: "2,4 ÷ 0,06 = ?",
+                options: ["4", "0,4", "400", "40"],
+                correctIndex: 3, // D
+                explanation: "Pembagi 0,06 punya 2 angka desimal, maka geser koma 2 kali pada KEDUANYA (dikali 100). 2,4 menjadi 240, dan 0,06 menjadi 6. Hitung 240 ÷ 6 = 40."
+            },
+            {
+                id: 25,
+                category: "Cacah ÷ Desimal",
+                text: "Hasil pembagian dari bilangan berikut adalah:",
+                math: "18 ÷ 0,2 = ?",
+                options: ["9", "90", "900", "0,9"],
+                correctIndex: 1, // B
+                explanation: "Kalikan kedua angka dengan 10 sehingga menjadi 180 ÷ 2 = 90."
+            },
+            {
+                id: 26,
+                category: "Desimal 2 Angka ÷ Cacah",
+                text: "Berapakah hasil pembagian berikut?",
+                math: "0,64 ÷ 8 = ?",
+                options: ["0,8", "8", "0,08", "0,008"],
+                correctIndex: 2, // C
+                explanation: "Hitung 64 ÷ 8 = 8. Karena 0,64 memiliki 2 angka di belakang koma, kembalikan 2 angka desimal menjadi 0,08."
+            },
+            {
+                id: 27,
+                category: "Desimal ÷ Desimal",
+                text: "Hitunglah hasil dari pembagian desimal berikut:",
+                math: "4,9 ÷ 0,7 = ?",
+                options: ["7", "0,7", "70", "0,07"],
+                correctIndex: 0, // A
+                explanation: "Geser koma 1 kali ke kanan pada kedua angka (dikali 10) menjadi 49 ÷ 7 = 7."
+            },
+            {
+                id: 28,
+                category: "Soal Cerita",
+                text: "Sebuah papan kayu sepanjang 1,8 meter dipotong-potong menjadi beberapa bagian yang masing-masing panjangnya 0,3 meter. Berapa potong kayu yang diperoleh?",
+                math: "1,8 meter ÷ 0,3 meter",
+                options: ["18 potong", "3 potong", "6 potong", "0,6 potong"],
+                correctIndex: 2, // C
+                explanation: "Geser koma 1 kali pada kedua angka (dikali 10) menjadi 18 ÷ 3 = 6 potong kayu."
+            },
+            {
+                id: 29,
+                category: "Cacah ÷ Desimal",
+                text: "Berapakah hasil dari pembagian berikut?",
+                math: "16 ÷ 0,8 = ?",
+                options: ["2", "20", "200", "0,2"],
+                correctIndex: 1, // B
+                explanation: "Kalikan kedua angka dengan 10 sehingga menjadi 160 ÷ 8 = 20."
+            },
+            {
+                id: 30,
+                category: "Desimal ÷ Desimal 2 Angka",
+                text: "Hasil pembagian desimal dengan 2 angka di belakang koma berikut adalah:",
+                math: "0,36 ÷ 0,09 = ?",
+                options: ["0,4", "40", "0,04", "4"],
+                correctIndex: 3, // D
+                explanation: "Geser koma 2 kali ke kanan pada kedua angka (dikali 100) menjadi 36 ÷ 9 = 4."
+            }
+        ];
+
+        /* 2. STATE MANAGEMENT & LOCAL STORAGE PERSISTENCE */
+        const STORAGE_KEY = 'desimal_quiz_4sd_state_v1';
+
+        let state = {
+            currentIndex: 0,
+            answers: {}, // { [qIndex]: selectedOptionIndex }
+            isAudioMuted: false
+        };
+
+        // Load state from localStorage on init
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed === 'object') {
+                        state.answers = parsed.answers || {};
+                        state.currentIndex = parsed.currentIndex || 0;
+                        state.isAudioMuted = parsed.isAudioMuted || false;
+                    }
+                }
+            } catch (e) {
+                console.error("Gagal memuat simpanan lokal:", e);
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    answers: state.answers,
+                    currentIndex: state.currentIndex,
+                    isAudioMuted: state.isAudioMuted
+                }));
+                // Flash saved indicator
+                const ind = document.getElementById('saved-indicator');
+                if (ind) {
+                    ind.classList.add('scale-105');
+                    setTimeout(() => ind.classList.remove('scale-105'), 200);
+                }
+            } catch (e) {
+                console.error("Gagal menyimpan ke simpanan lokal:", e);
+            }
+        }
+
+        /* 3. AUDIO SYNTHESIZER (NO EXTERNAL ASSETS NEEDED) */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (state.isAudioMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'pop') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            }
+        }
+
+        function toggleAudio() {
+            state.isAudioMuted = !state.isAudioMuted;
+            saveState();
+            updateAudioIcon();
+            if (!state.isAudioMuted) playSound('pop');
+        }
+
+        function updateAudioIcon() {
+            const icon = document.getElementById('sound-icon');
+            if (icon) {
+                icon.className = state.isAudioMuted 
+                    ? 'fa-solid fa-volume-xmark text-red-500' 
+                    : 'fa-solid fa-volume-high text-slate-600';
+            }
+        }
+
+        /* 4. RENDER FUNCTIONS */
+
+        function renderHeaderStats() {
+            let answeredCount = 0;
+            let correctCount = 0;
+
+            quizQuestions.forEach((q, idx) => {
+                if (state.answers.hasOwnProperty(idx)) {
+                    answeredCount++;
+                    if (state.answers[idx] === q.correctIndex) {
+                        correctCount++;
+                    }
+                }
+            });
+
+            // Progress text
+            document.getElementById('stat-progress').textContent = `${answeredCount}/30`;
+            
+            // Stars (Each correct answer grants 1 star)
+            document.getElementById('stat-stars').textContent = correctCount;
+
+            // Progress bar
+            const percent = Math.round((answeredCount / 30) * 100);
+            document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+
+            // Completion Summary Check
+            if (answeredCount === 30) {
+                const summaryBox = document.getElementById('completion-summary');
+                if (summaryBox) {
+                    summaryBox.classList.remove('hidden');
+                    document.getElementById('final-correct').textContent = `${correctCount} / 30`;
+                    document.getElementById('final-accuracy').textContent = `${Math.round((correctCount/30)*100)}%`;
+                    document.getElementById('final-stars').textContent = correctCount;
+
+                    // Trigger confetti once fully completed
+                    if (!summaryBox.dataset.confettiFired) {
+                        confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                        });
+                        summaryBox.dataset.confettiFired = "true";
+                    }
+                }
+            } else {
+                document.getElementById('completion-summary').classList.add('hidden');
+            }
+        }
+
+        function renderPaletteGrid() {
+            const container = document.getElementById('palette-grid');
+            container.innerHTML = '';
+
+            quizQuestions.forEach((q, idx) => {
+                const isCurrent = idx === state.currentIndex;
+                const hasAnswered = state.answers.hasOwnProperty(idx);
+                const isCorrect = hasAnswered && state.answers[idx] === q.correctIndex;
+
+                let btnClass = "w-full aspect-square rounded-xl font-kids text-sm font-bold flex flex-col items-center justify-center transition transform active:scale-95 ";
+
+                if (isCurrent) {
+                    btnClass += "ring-4 ring-brand-purple shadow-md ";
+                }
+
+                if (hasAnswered) {
+                    if (isCorrect) {
+                        btnClass += "bg-emerald-500 text-white shadow-sm ";
+                    } else {
+                        btnClass += "bg-rose-500 text-white shadow-sm ";
+                    }
+                } else {
+                    btnClass += "bg-slate-100 hover:bg-slate-200 text-slate-700 ";
+                }
+
+                const btn = document.createElement('button');
+                btn.className = btnClass;
+                btn.innerHTML = `
+                    <span>${idx + 1}</span>
+                    ${hasAnswered ? `<i class="fa-solid ${isCorrect ? 'fa-check' : 'fa-xmark'} text-[10px] -mt-0.5"></i>` : ''}
+                `;
+                btn.onclick = () => {
+                    playSound('pop');
+                    state.currentIndex = idx;
+                    saveState();
+                    renderQuestion();
+                    renderPaletteGrid();
+                };
+
+                container.appendChild(btn);
+            });
+        }
+
+        function renderQuestion() {
+            const q = quizQuestions[state.currentIndex];
+            const hasAnswered = state.answers.hasOwnProperty(state.currentIndex);
+            const userAns = state.answers[state.currentIndex];
+
+            // Header info
+            document.getElementById('q-number-badge').textContent = `Soal #${q.id}`;
+            document.getElementById('q-category-badge').textContent = q.category;
+            document.getElementById('current-q-num').textContent = state.currentIndex + 1;
+
+            const statusEl = document.getElementById('q-status-text');
+            if (hasAnswered) {
+                const isCorrect = userAns === q.correctIndex;
+                statusEl.className = isCorrect ? "text-xs font-bold text-emerald-600" : "text-xs font-bold text-rose-600";
+                statusEl.innerHTML = isCorrect 
+                    ? `<i class="fa-solid fa-circle-check"></i> Dijawab Benar` 
+                    : `<i class="fa-solid fa-circle-xmark"></i> Dijawab Salah`;
+            } else {
+                statusEl.className = "text-xs font-bold text-slate-400";
+                statusEl.textContent = "Belum Dijawab";
+            }
+
+            // Question Text & Equation
+            document.getElementById('q-text').textContent = q.text;
+            document.getElementById('q-math-box').textContent = q.math;
+
+            // Options
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const optionPrefixes = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = hasAnswered && userAns === optIdx;
+                const isCorrectOpt = optIdx === q.correctIndex;
+
+                let optClass = "p-4 rounded-2xl border-2 font-kids text-left flex items-center justify-between transition cursor-pointer active:scale-[0.99] ";
+
+                if (hasAnswered) {
+                    if (isCorrectOpt) {
+                        optClass += "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-sm ";
+                    } else if (isSelected && !isCorrectOpt) {
+                        optClass += "bg-rose-50 border-rose-500 text-rose-900 shadow-sm ";
+                    } else {
+                        optClass += "bg-white border-slate-100 text-slate-400 opacity-60 cursor-not-allowed ";
+                    }
+                } else {
+                    optClass += "bg-white hover:bg-blue-50/50 border-slate-200 hover:border-brand-blue text-slate-800 shadow-sm ";
+                }
+
+                const btn = document.createElement('div');
+                btn.className = optClass;
+
+                let iconHtml = '';
+                if (hasAnswered) {
+                    if (isCorrectOpt) {
+                        iconHtml = `<span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></span>`;
+                    } else if (isSelected) {
+                        iconHtml = `<span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></span>`;
+                    }
+                }
+
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center ${
+                            isSelected 
+                                ? (isCorrectOpt ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white')
+                                : (hasAnswered && isCorrectOpt ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-600')
+                        }">
+                            ${optionPrefixes[optIdx]}
+                        </span>
+                        <span class="text-base md:text-lg font-bold">${optText}</span>
+                    </div>
+                    ${iconHtml}
+                `;
+
+                if (!hasAnswered) {
+                    btn.onclick = () => handleSelectOption(optIdx);
+                }
+
+                container.appendChild(btn);
+            });
+
+            // Explanation Box
+            const expBox = document.getElementById('explanation-box');
+            if (hasAnswered) {
+                const isCorrect = userAns === q.correctIndex;
+                expBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-rose-50', 'border-rose-200');
+                
+                if (isCorrect) {
+                    expBox.classList.add('bg-emerald-50', 'border-emerald-200');
+                    document.getElementById('explanation-title').className = "flex items-center space-x-2 font-bold font-kids text-base text-emerald-800";
+                    document.getElementById('explanation-icon').className = "fa-solid fa-circle-check text-emerald-600";
+                    document.getElementById('explanation-header-text').textContent = "Jawaban Kamu Tepat Sekali! 🎉";
+                } else {
+                    expBox.classList.add('bg-rose-50', 'border-rose-200');
+                    document.getElementById('explanation-title').className = "flex items-center space-x-2 font-bold font-kids text-base text-rose-800";
+                    document.getElementById('explanation-icon').className = "fa-solid fa-circle-xmark text-rose-600";
+                    document.getElementById('explanation-header-text').textContent = "Jawaban Kurang Tepat, Ini Pembahasannya:";
+                }
+
+                document.getElementById('explanation-text').textContent = q.explanation;
+            } else {
+                expBox.classList.add('hidden');
+            }
+
+            // Prev / Next button states
+            document.getElementById('btn-prev').disabled = state.currentIndex === 0;
+            document.getElementById('btn-next').disabled = state.currentIndex === quizQuestions.length - 1;
+
+            // Update stats & palette
+            renderHeaderStats();
+            renderPaletteGrid();
+        }
+
+        /* 5. INTERACTION HANDLERS */
+
+        function handleSelectOption(optIdx) {
+            const q = quizQuestions[state.currentIndex];
+            state.answers[state.currentIndex] = optIdx;
+            saveState();
+
+            const isCorrect = optIdx === q.correctIndex;
+            playSound(isCorrect ? 'correct' : 'wrong');
+
+            renderQuestion();
+        }
+
+        function navigateQuestion(direction) {
+            playSound('pop');
+            const newIndex = state.currentIndex + direction;
+            if (newIndex >= 0 && newIndex < quizQuestions.length) {
+                state.currentIndex = newIndex;
+                saveState();
+                renderQuestion();
+            }
+        }
+
+        function confirmReset() {
+            if (confirm("Apakah kamu yakin ingin mengulang quiz dari awal? Semua jawaban tersimpan akan dihapus.")) {
+                playSound('pop');
+                state.answers = {};
+                state.currentIndex = 0;
+                saveState();
+                
+                const summaryBox = document.getElementById('completion-summary');
+                if (summaryBox) delete summaryBox.dataset.confettiFired;
+
+                renderQuestion();
+            }
+        }
+
+        /* 6. INITIALIZATION */
+        window.onload = function() {
+            loadSavedState();
+            updateAudioIcon();
+            renderQuestion();
+        };
+    </script>
+</body>
+</html>
